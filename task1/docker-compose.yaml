@@ -1,0 +1,108 @@
+version: '3'
+services:
+
+# Router
+  router1:
+    image: mongo:6.0.2
+    container_name: router-1
+    command: mongos --port 2717 --configdb rs-config-server/configsvr1:2717 --bind_ip_all
+    ports:
+      - 2717:2717
+    volumes:
+      - ./inits:/inits
+      - ../data:/data
+
+# Config Servers
+  configsvr1:
+    image: mongo:6.0.2
+    container_name: mongo-config-1 
+    command: mongod --port 2717 --configsvr --replSet rs-config-server
+    volumes:
+      - ./inits:/inits
+    links:
+      - shard1-a
+      - shard2-a 
+  configsvr2:
+    image: mongo:6.0.2
+    container_name: mongo-config-2 
+    command: mongod --port 2717 --configsvr --replSet rs-config-server
+    volumes:
+      - ./inits:/inits
+    links:
+      - configsvr1
+  configsvr3:
+    image: mongo:6.0.2
+    container_name: mongo-config-3 
+    command: mongod --port 2717 --configsvr --replSet rs-config-server
+    links:
+      - configsvr2
+
+# shards
+  ## shards 1
+  shard1-a:
+    image: mongo:6.0.2
+    container_name: shard-1-node-a
+    command: mongod --port 2717 --shardsvr --replSet rs-shard-1
+    volumes:
+      - ./inits:/inits
+    links:
+      - shard1-b
+      - shard1-c
+  shard1-b:
+    image: mongo:6.0.2
+    container_name: shard-1-node-b
+    command: mongod --port 2717 --shardsvr --replSet rs-shard-1
+    volumes:
+      - ./inits:/inits
+  shard1-c:
+    image: mongo:6.0.2
+    container_name: shard-1-node-c
+    command: mongod --port 2717 --shardsvr --replSet rs-shard-1
+    volumes:
+      - ./inits:/inits
+
+  ## shards 2
+  shard2-a:
+    image: mongo:6.0.2
+    container_name: shard-2-node-a
+    command: mongod --port 2717 --shardsvr --replSet rs-shard-2
+    volumes:
+      - ./inits:/inits
+    links:
+      - shard2-b
+      - shard2-c
+  shard2-b:
+    image: mongo:6.0.2
+    container_name: shard-2-node-b
+    command: mongod --port 2717 --shardsvr --replSet rs-shard-2
+    volumes:
+      - ./inits:/inits
+  shard2-c:
+    image: mongo:6.0.2
+    container_name: shard-2-node-c
+    command: mongod --port 2717 --shardsvr --replSet rs-shard-2
+    volumes:
+      - ./inits:/inits
+
+  ## shards 3
+  shard3-a:
+    image: mongo:6.0.2
+    container_name: shard-3-node-a
+    command: mongod --port 2717 --shardsvr --replSet rs-shard-3
+    volumes:
+      - ./inits:/inits
+    links:
+      - shard3-b
+      - shard3-c
+  shard3-b:
+    image: mongo:6.0.2
+    container_name: shard-3-node-b
+    command: mongod --port 2717 --shardsvr --replSet rs-shard-3
+    volumes:
+      - ./inits:/inits
+  shard3-c:
+    image: mongo:6.0.2
+    container_name: shard-3-node-c
+    command: mongod --port 2717 --shardsvr --replSet rs-shard-3
+    volumes:
+      - ./inits:/inits
